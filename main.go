@@ -20,6 +20,6 @@ func main() {
 
 func root(w http.ResponseWriter, r *http.Request) {
 	spew.Dump(*r)
-	w.Header().Add("content-type", "image/x-png")
+	//w.Header().Add("content-type", "image/x-png")
 	w.Header().Add("Cache-Control", "no-cache")
 }

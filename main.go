@@ -20,5 +20,5 @@ func main() {
 
 func root(w http.ResponseWriter, r *http.Request) {
 	spew.Dump(*r)
-	//w.Header().Add("content-type", "image/blabla")
+	w.Header().Add("content-type", "image/x-png")
 }

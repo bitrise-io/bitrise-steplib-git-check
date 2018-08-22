@@ -1,0 +1,11 @@
+{
+    "name": "gogittag",
+    "description": "gogittag",
+    "keywords": [
+      "go",
+      "sample",
+      "example"
+    ],
+    "website": "http://github.com/trapacska/gogittag",
+    "repository": "http://github.com/trapacska/gogittag"
+  }

@@ -19,7 +19,7 @@ func main() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/tag", tagHandler).Methods("GET")
-	router.HandleFunc("/update", updateHandler).Methods("GET")
+	router.HandleFunc("/update", updateHandler).Methods("POST")
 
 	if err := http.ListenAndServe(":"+envy.Get("PORT", "8000"), router); err != nil {
 		log.Fatal(err)

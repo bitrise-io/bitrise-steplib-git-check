@@ -138,8 +138,6 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 	////
 	// check if the pr just opened has step.yml in it
 	//
-	fmt.Println(pr)
-
 	exists, err := isPRHasStepYML(fmt.Sprintf("%d", pr.Number))
 	if err != nil {
 		fmt.Println(err)
@@ -152,7 +150,7 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 
 	//
 	////
-	if strings.Contains(pr.PullRequest.Body, fmt.Sprintf("https://gogittag.herokuapp.com/tag?pr=%d", pr.Number)) {
+	if strings.Contains(pr.PullRequest.Body, fmt.Sprintf("https://%s/tag?pr=%d", hostBaseURL, pr.Number)) {
 		return
 	}
 
@@ -161,7 +159,7 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 	//
 
 	apiURL := fmt.Sprintf("https://api.github.com/repos/bitrise-io/bitrise-steplib/pulls/%d", pr.Number)
-	badgeContent := fmt.Sprintf("![TagCheck](https://gogittag.herokuapp.com/tag?pr=%d)\r\n\r\n", pr.Number)
+	badgeContent := fmt.Sprintf("![TagCheck](https://%s/tag?pr=%d)\r\n\r\n", hostBaseURL, pr.Number)
 	newBody := map[string]interface{}{
 		"body": badgeContent + pr.PullRequest.Body,
 	}

@@ -20,6 +20,7 @@ const (
 	icnErr       = "assets/cross.svg"
 	icnErrSemver = "assets/invalid-semver.svg"
 	icnErrCommit = "assets/invalid-commit.svg"
+	hostBaseURL  = "gogittag.herokuapp.com"
 )
 
 type githubtag struct {

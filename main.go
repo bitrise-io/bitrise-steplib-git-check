@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/gobuffalo/envy"
 	"github.com/gorilla/mux"
@@ -79,6 +80,10 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 
 		switch pr.Action {
 		case "opened":
+			if strings.Contains(pr.PullRequest.Body, fmt.Sprintf("https://gogittag.herokuapp.com/tag?pr=%d", pr.PullRequest.Number)) {
+				return
+			}
+
 			apiURL := fmt.Sprintf("https://api.github.com/repos/bitrise-io/bitrise-steplib/pulls/%d", pr.PullRequest.Number)
 			newBody := map[string]interface{}{"body": fmt.Sprintf("![TagCheck](https://gogittag.herokuapp.com/tag?pr=%d)\r\n\r\n", pr.PullRequest.Number) + pr.PullRequest.Body}
 
@@ -87,8 +92,6 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 				log.Fatal(err)
 				return
 			}
-
-			fmt.Println("apiurl:", apiURL, "new body:", string(b))
 
 			c := http.Client{}
 			req, err := http.NewRequest("PATCH", apiURL, bytes.NewReader(b))
@@ -99,16 +102,12 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 
 			req.SetBasicAuth(os.Getenv("GITHUB_USER"), os.Getenv("GITHUB_ACCESS_TOKEN"))
 
-			resp, err := c.Do(req)
+			_, err = c.Do(req)
 			if err != nil {
 				log.Fatal(err)
 				return
 			}
 
-			bo, _ := ioutil.ReadAll(resp.Body)
-			fmt.Println(string(bo))
-
-			fmt.Printf("%+v\n", *resp)
 			break
 		}
 		break

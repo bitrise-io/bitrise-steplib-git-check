@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 
 	"github.com/gobuffalo/envy"
@@ -60,46 +63,47 @@ func tagHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func updatePRs() error {
-	// r, err := http.Get("https://api.github.com/repos/bitrise-io/bitrise-steplib/pulls?state=open")
-	// if err != nil {
-	// 	return err
-	// }
-
-	// b, err := ioutil.ReadAll(r.Body)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// //var prs []githubpr
-	// if err := json.Unmarshal(b, &prs); err != nil {
-	// 	return err
-	// }
-
-	// for _, pr := range prs {
-	// 	if !strings.Contains(pr.Body, "![TagCheck](https://gogittag.herokuapp.com/tag?pr=") {
-	// 		// update here
-	// 	}
-	// }
-
-	return nil
-}
-
 func updateHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Header.Get("X-Github-Event") {
 	case "pull_request":
 		b, err := ioutil.ReadAll(r.Body)
 		if err != nil {
+			log.Fatal(err)
 			return
 		}
 		var pr pullRequestModel
 		if err := json.Unmarshal(b, &pr); err != nil {
+			log.Fatal(err)
 			return
 		}
 
 		switch pr.Action {
 		case "opened":
+			apiURL := fmt.Sprintf("https://api.github.com/repos/bitrise-io/bitrise-steplib/pulls/%d", pr.PullRequest.Number)
+			newBody := map[string]interface{}{"body": fmt.Sprintf("![TagCheck](https://gogittag.herokuapp.com/tag?pr=%d)\r\n\r\n", pr.PullRequest.Number) + pr.PullRequest.Body}
 
+			b, err := json.Marshal(newBody)
+			if err != nil {
+				log.Fatal(err)
+				return
+			}
+
+			c := http.Client{}
+			req, err := http.NewRequest("PATCH", apiURL, bytes.NewReader(b))
+			if err != nil {
+				log.Fatal(err)
+				return
+			}
+
+			req.Header.Add("Authorization", "Basic "+os.Getenv("GITHUB_USER")+":"+os.Getenv("GITHUB_ACCESS_TOKEN"))
+
+			resp, err := c.Do(req)
+			if err != nil {
+				log.Fatal(err)
+				return
+			}
+
+			fmt.Printf("%+v\n", *resp)
 			break
 		}
 		break

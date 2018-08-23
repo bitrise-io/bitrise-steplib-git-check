@@ -35,8 +35,8 @@ type pullRequestModel struct {
 }
 
 type content struct {
-	HTMLURL string `json:"html_url"`
-	Body    string `json:"body"`
+	Number int    `json:"number"`
+	Body   string `json:"body"`
 }
 
 func checkGithubTag(giturl string, tag string, commit string) error {

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -29,7 +28,7 @@ func main() {
 	////
 
 	if err := http.ListenAndServe(":"+envy.Get("PORT", "8000"), router); err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 	}
 }
 
@@ -45,7 +44,7 @@ func tagHandler(w http.ResponseWriter, r *http.Request) {
 	prID := r.URL.Query().Get("pr")
 	if prID == "" {
 		if err := respondWithIcon(icnErr, w); err != nil {
-			log.Fatal(err)
+			fmt.Println(err)
 		}
 		return
 	}
@@ -57,7 +56,7 @@ func tagHandler(w http.ResponseWriter, r *http.Request) {
 	version, giturl, commit, err := parseStepYML(prID)
 	if err != nil {
 		if err := respondWithIcon(icnErr, w); err != nil {
-			log.Fatal(err)
+			fmt.Println(err)
 		}
 		return
 	}
@@ -71,7 +70,7 @@ func tagHandler(w http.ResponseWriter, r *http.Request) {
 	// check if icon has 3 parts
 	if len(versionParts) != 3 {
 		if err := respondWithIcon(icnErrSemver, w); err != nil {
-			log.Fatal(err)
+			fmt.Println(err)
 		}
 		return
 	}
@@ -80,7 +79,7 @@ func tagHandler(w http.ResponseWriter, r *http.Request) {
 	for _, part := range versionParts {
 		if _, err := strconv.Atoi(part); err != nil {
 			if err := respondWithIcon(icnErrSemver, w); err != nil {
-				log.Fatal(err)
+				fmt.Println(err)
 			}
 			return
 		}
@@ -95,7 +94,7 @@ func tagHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err := checkGithubTag(giturl, version, commit); err != nil {
 		if err := respondWithIcon(icnErrCommit, w); err != nil {
-			log.Fatal(err)
+			fmt.Println(err)
 		}
 		return
 	}
@@ -108,7 +107,7 @@ func tagHandler(w http.ResponseWriter, r *http.Request) {
 	//
 
 	if err := respondWithIcon(icnOk, w); err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 	}
 
 	//
@@ -126,7 +125,7 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 
 	var pr pullRequestModel
 	if err := yaml.NewDecoder(r.Body).Decode(&pr); err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 		return
 	}
 
@@ -143,7 +142,7 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 
 	exists, err := isPRHasStepYML(fmt.Sprintf("%d", pr.PullRequest.Number))
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 		return
 	}
 
@@ -170,7 +169,7 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 	// convert new body message to json
 	b, err := json.Marshal(newBody)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 		return
 	}
 
@@ -178,14 +177,14 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 	c := http.Client{}
 	req, err := http.NewRequest("PATCH", apiURL, bytes.NewReader(b))
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 		return
 	}
 
 	req.SetBasicAuth(os.Getenv("GITHUB_USER"), os.Getenv("GITHUB_ACCESS_TOKEN"))
 	_, err = c.Do(req)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 		return
 	}
 

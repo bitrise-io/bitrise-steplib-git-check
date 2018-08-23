@@ -139,6 +139,7 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 	////
 	// check if the pr just opened has step.yml in it
 	//
+	fmt.Println(pr)
 
 	exists, err := isPRHasStepYML(fmt.Sprintf("%d", pr.PullRequest.Number))
 	if err != nil {

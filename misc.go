@@ -90,7 +90,7 @@ func httpLoadJSON(url string, model interface{}) error {
 	}
 
 	if err := json.Unmarshal(b, model); err != nil {
-		fmt.Println(string(b))
+		fmt.Println(url, string(b))
 		return err
 	}
 	return nil

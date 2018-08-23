@@ -22,10 +22,20 @@ type githubtag struct {
 	} `json:"commit"`
 }
 
-type githubpr struct {
-	URL     string `json:"url"`
-	DiffURL string `json:"diff_url"`
-	State   string `json:"state"`
+// type githubpr struct {
+// 	URL     string `json:"url"`
+// 	DiffURL string `json:"diff_url"`
+// 	State   string `json:"state"`
+// 	Body    string `json:"body"`
+// }
+
+type pullRequestModel struct {
+	Action      string  `json:"action"`
+	PullRequest content `json:"pull_request"`
+}
+
+type content struct {
+	HTMLURL string `json:"html_url"`
 	Body    string `json:"body"`
 }
 

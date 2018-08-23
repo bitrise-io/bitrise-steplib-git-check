@@ -7,9 +7,6 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
-	"strings"
-
-	"github.com/davecgh/go-spew/spew"
 
 	"github.com/gobuffalo/envy"
 	"github.com/gorilla/mux"
@@ -65,39 +62,45 @@ func tagHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func updatePRs() error {
-	r, err := http.Get("https://api.github.com/repos/bitrise-io/bitrise-steplib/pulls?state=open")
-	if err != nil {
-		return err
-	}
+	// r, err := http.Get("https://api.github.com/repos/bitrise-io/bitrise-steplib/pulls?state=open")
+	// if err != nil {
+	// 	return err
+	// }
 
-	b, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		return err
-	}
+	// b, err := ioutil.ReadAll(r.Body)
+	// if err != nil {
+	// 	return err
+	// }
 
-	var prs []githubpr
-	if err := json.Unmarshal(b, &prs); err != nil {
-		return err
-	}
+	// //var prs []githubpr
+	// if err := json.Unmarshal(b, &prs); err != nil {
+	// 	return err
+	// }
 
-	for _, pr := range prs {
-		if !strings.Contains(pr.Body, "![TagCheck](https://gogittag.herokuapp.com/tag?pr=") {
-			// update here
-		}
-	}
+	// for _, pr := range prs {
+	// 	if !strings.Contains(pr.Body, "![TagCheck](https://gogittag.herokuapp.com/tag?pr=") {
+	// 		// update here
+	// 	}
+	// }
 
 	return nil
 }
 
 func updateHandler(w http.ResponseWriter, r *http.Request) {
-	b, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		panic(err)
+	switch r.Header.Get("X-Github-Event") {
+	case "pull_request":
+		b, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			// return err
+		}
+
+		var pr pullRequestModel
+
+		if err := json.Unmarshal(b, &pr); err != nil {
+			// return err
+		}
+
+		fmt.Printf("%#v\n", pr)
+		break
 	}
-
-	fmt.Println(string(b))
-
-	spew.Dump(*r)
-
-	w.WriteHeader(http.StatusOK)
 }

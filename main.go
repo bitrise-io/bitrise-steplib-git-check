@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -26,15 +25,15 @@ func main() {
 func tagHandler(w http.ResponseWriter, r *http.Request) {
 	setHeaders(w)
 
-	prURL := r.URL.Query().Get("pr")
-	if prURL == "" {
+	prID := r.URL.Query().Get("pr")
+	if prID == "" {
 		if err := respondWithIcon(icnErr, w); err != nil {
 			log.Fatal(err)
 		}
 		return
 	}
 
-	prDiff, err := getPRDiffLines(prURL)
+	prDiff, err := getPRDiffLines(prID)
 	if err != nil {
 		log.Fatal(err)
 		if err := respondWithIcon(icnErr, w); err != nil {
@@ -91,16 +90,18 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 	case "pull_request":
 		b, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			// return err
+			return
 		}
-
 		var pr pullRequestModel
-
 		if err := json.Unmarshal(b, &pr); err != nil {
-			// return err
+			return
 		}
 
-		fmt.Printf("%#v\n", pr)
+		switch pr.Action {
+		case "opened":
+
+			break
+		}
 		break
 	}
 }

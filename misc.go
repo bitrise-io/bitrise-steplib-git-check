@@ -101,8 +101,8 @@ func trimLinesPrefixes(lns []string, s string) []string {
 	return lns
 }
 
-func getPRDiffLines(url string) ([]string, error) {
-	r, err := http.Get(url + ".diff")
+func getPRDiffLines(id string) ([]string, error) {
+	r, err := http.Get(fmt.Sprintf("https://github.com/bitrise-io/bitrise-steplib/pull/%s", id) + ".diff")
 	if err != nil {
 		return nil, err
 	}

@@ -103,6 +103,9 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
+			bo, _ := ioutil.ReadAll(resp.Body)
+			fmt.Println(string(bo))
+
 			fmt.Printf("%+v\n", *resp)
 			break
 		}

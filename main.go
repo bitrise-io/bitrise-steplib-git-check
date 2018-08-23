@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	icnErr = "cross.png"
-	icnOk  = "check.png"
+	icnErr = "cross.svg"
+	icnOk  = "ok.svg"
 )
 
 type gittag struct {
@@ -152,7 +152,7 @@ func getPRDiff(url string) ([]string, error) {
 }
 
 func setHeaders(w http.ResponseWriter) {
-	w.Header().Add("Content-Type", "image/x-png")
+	w.Header().Add("Content-Type", "image/svg+xml")
 	w.Header().Add("Cache-Control", "no-cache")
 }
 

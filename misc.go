@@ -115,7 +115,7 @@ func isPRHasStepYML(prID string) (bool, error) {
 	}
 
 	for _, file := range files {
-		if strings.HasSuffix(file.Filename, "step.yml") {
+		if strings.HasSuffix(file.Filename, "/step.yml") && strings.HasPrefix(file.Filename, "steps/") {
 			return true, nil
 		}
 	}
@@ -130,7 +130,7 @@ func parseStepYML(prID string) (version string, url string, commit string, err e
 	}
 
 	for _, file := range files {
-		if strings.HasSuffix(file.Filename, "step.yml") {
+		if strings.HasSuffix(file.Filename, "step.yml") && strings.HasPrefix(file.Filename, "steps/") {
 			var yml stepmanModels.StepModel
 			if err := httpLoadYML(file.RawURL, &yml); err != nil {
 				return "", "", "", err
@@ -148,5 +148,5 @@ func parseStepYML(prID string) (version string, url string, commit string, err e
 		}
 	}
 
-	return "", "", "", nil
+	return "", "", "", fmt.Errorf("no step.yml found")
 }

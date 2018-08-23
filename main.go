@@ -2,11 +2,14 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"path/filepath"
 	"strings"
+
+	"github.com/davecgh/go-spew/spew"
 
 	"github.com/gobuffalo/envy"
 	"github.com/gorilla/mux"
@@ -87,5 +90,12 @@ func updatePRs() error {
 }
 
 func updateHandler(w http.ResponseWriter, r *http.Request) {
+	b, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		panic(err)
+	}
 
+	fmt.Println(string(b))
+
+	spew.Dump(*r)
 }

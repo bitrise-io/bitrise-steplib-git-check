@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"path/filepath"
 	"strings"
@@ -82,7 +83,14 @@ func httpLoadJSON(url string, model interface{}) error {
 	if err != nil {
 		return err
 	}
-	if err := json.NewDecoder(r.Body).Decode(model); err != nil {
+
+	b, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return err
+	}
+
+	if err := json.Unmarshal(b, model); err != nil {
+		fmt.Println(string(b))
 		return err
 	}
 	return nil

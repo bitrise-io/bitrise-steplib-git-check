@@ -11,7 +11,6 @@ import (
 
 	"github.com/gobuffalo/envy"
 	"github.com/gorilla/mux"
-	yaml "gopkg.in/yaml.v2"
 )
 
 func main() {
@@ -124,7 +123,7 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var pr pullRequestModel
-	if err := yaml.NewDecoder(r.Body).Decode(&pr); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&pr); err != nil {
 		fmt.Println(err)
 		return
 	}

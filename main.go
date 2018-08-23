@@ -88,6 +88,8 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
+			fmt.Println("apiurl:", apiURL, "new body:", string(b))
+
 			c := http.Client{}
 			req, err := http.NewRequest("PATCH", apiURL, bytes.NewReader(b))
 			if err != nil {
@@ -96,7 +98,7 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 			}
 
 			req.Header.Add("Authorization", "Basic "+os.Getenv("GITHUB_USER")+":"+os.Getenv("GITHUB_ACCESS_TOKEN"))
-
+			fmt.Println("Authorization " + "Basic " + os.Getenv("GITHUB_USER") + ":" + os.Getenv("GITHUB_ACCESS_TOKEN"))
 			resp, err := c.Do(req)
 			if err != nil {
 				log.Fatal(err)

@@ -3,16 +3,22 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"path/filepath"
 	"strings"
 
+	"gopkg.in/yaml.v2"
+
 	"github.com/bitrise-io/go-utils/fileutil"
+
+	stepmanModels "github.com/bitrise-io/stepman/models"
 )
 
 const (
-	icnErr = "assets/cross.svg"
-	icnOk  = "assets/ok.svg"
+	icnOk        = "assets/ok.svg"
+	icnErr       = "assets/cross.svg"
+	icnErrSemver = "assets/invalid-semver.svg"
+	icnErrCommit = "assets/invalid-commit.svg"
 )
 
 type githubtag struct {
@@ -21,13 +27,6 @@ type githubtag struct {
 		SHA string `json:"sha"`
 	} `json:"commit"`
 }
-
-// type githubpr struct {
-// 	URL     string `json:"url"`
-// 	DiffURL string `json:"diff_url"`
-// 	State   string `json:"state"`
-// 	Body    string `json:"body"`
-// }
 
 type pullRequestModel struct {
 	Action      string  `json:"action"`
@@ -39,24 +38,19 @@ type content struct {
 	Body   string `json:"body"`
 }
 
+type file struct {
+	Filename string `json:"filename"`
+	RawURL   string `json:"raw_url"`
+}
+
 func checkGithubTag(giturl string, tag string, commit string) error {
 	giturl = strings.TrimSuffix(giturl, ".git")
 	giturl = strings.Replace(giturl, "https://github.com/", "https://api.github.com/repos/", 1)
 	giturl = giturl + "/tags"
 
-	r, err := http.Get(giturl)
-	if err != nil {
-		return err
-	}
-
-	b, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		return err
-	}
-
 	var tags []githubtag
 
-	if err := json.Unmarshal(b, &tags); err != nil {
+	if err := httpLoadJSON(giturl, &tags); err != nil {
 		return err
 	}
 
@@ -67,52 +61,6 @@ func checkGithubTag(giturl string, tag string, commit string) error {
 	}
 
 	return fmt.Errorf("not found")
-}
-
-func getLinesAfterLineHasPrefix(s []string, prefix string) []string {
-	started := false
-	for _, line := range s {
-		if !started {
-			if strings.HasPrefix(line, prefix) {
-				started = true
-			}
-			s = s[1:]
-			continue
-		}
-	}
-	return s
-}
-
-func getLineContentAfterPrefix(s []string, prefix string) (f string) {
-	for _, line := range s {
-		if strings.HasPrefix(line, prefix) {
-			f = line
-			break
-		}
-	}
-	f = strings.TrimPrefix(f, prefix)
-	return
-}
-
-func trimLinesPrefixes(lns []string, s string) []string {
-	for i, l := range lns {
-		lns[i] = strings.TrimPrefix(l, s)
-	}
-	return lns
-}
-
-func getPRDiffLines(id string) ([]string, error) {
-	r, err := http.Get(fmt.Sprintf("https://github.com/bitrise-io/bitrise-steplib/pull/%s", id) + ".diff")
-	if err != nil {
-		return nil, err
-	}
-
-	b, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return strings.Split(string(b), "\n"), nil
 }
 
 func setHeaders(w http.ResponseWriter) {
@@ -127,4 +75,65 @@ func respondWithIcon(icn string, w http.ResponseWriter) error {
 	}
 	_, err = w.Write(b)
 	return err
+}
+
+func httpLoadJSON(url string, model interface{}) error {
+	r, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	if err := json.NewDecoder(r.Body).Decode(model); err != nil {
+		return err
+	}
+	return nil
+}
+
+func httpLoadYML(url string, model interface{}) error {
+	r, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	if err := yaml.NewDecoder(r.Body).Decode(model); err != nil {
+		return err
+	}
+	return nil
+}
+
+func isPRHasStepYML(prID string) (bool, error) {
+	var files []file
+	if err := httpLoadJSON(fmt.Sprintf("https://api.github.com/repos/bitrise-io/bitrise-steplib/pulls/%s/files", prID), &files); err != nil {
+		return false, err
+	}
+
+	for _, file := range files {
+		if strings.HasSuffix(file.Filename, "step.yml") {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+func parseStepYML(prID string) (version string, url string, commit string, err error) {
+	var files []file
+	if err := httpLoadJSON(fmt.Sprintf("https://api.github.com/repos/bitrise-io/bitrise-steplib/pulls/%s/files", prID), &files); err != nil {
+		return "", "", "", err
+	}
+
+	for _, file := range files {
+		if strings.HasSuffix(file.Filename, "step.yml") {
+			var yml stepmanModels.StepModel
+			if err := httpLoadYML(file.RawURL, &yml); err != nil {
+				return "", "", "", err
+			}
+
+			version = filepath.Base(filepath.Dir(file.Filename))
+			url = yml.Source.Git
+			commit = yml.Source.Commit
+
+			return version, url, commit, nil
+		}
+	}
+
+	return "", "", "", nil
 }

@@ -136,6 +136,10 @@ func parseStepYML(prID string) (version string, url string, commit string, err e
 				return "", "", "", err
 			}
 
+			if yml.Source == nil {
+				return "", "", "", fmt.Errorf("no source in step.yml")
+			}
+
 			version = filepath.Base(filepath.Dir(file.Filename))
 			url = yml.Source.Git
 			commit = yml.Source.Commit

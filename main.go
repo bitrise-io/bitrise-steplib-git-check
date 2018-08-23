@@ -141,7 +141,7 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 	//
 	fmt.Println(pr)
 
-	exists, err := isPRHasStepYML(fmt.Sprintf("%d", pr.PullRequest.Number))
+	exists, err := isPRHasStepYML(fmt.Sprintf("%d", pr.Number))
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -153,7 +153,7 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 
 	//
 	////
-	if strings.Contains(pr.PullRequest.Body, fmt.Sprintf("https://gogittag.herokuapp.com/tag?pr=%d", pr.PullRequest.Number)) {
+	if strings.Contains(pr.PullRequest.Body, fmt.Sprintf("https://gogittag.herokuapp.com/tag?pr=%d", pr.Number)) {
 		return
 	}
 
@@ -161,8 +161,8 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 	// updating the PR's initial comment section: append badge as first element
 	//
 
-	apiURL := fmt.Sprintf("https://api.github.com/repos/bitrise-io/bitrise-steplib/pulls/%d", pr.PullRequest.Number)
-	badgeContent := fmt.Sprintf("![TagCheck](https://gogittag.herokuapp.com/tag?pr=%d)\r\n\r\n", pr.PullRequest.Number)
+	apiURL := fmt.Sprintf("https://api.github.com/repos/bitrise-io/bitrise-steplib/pulls/%d", pr.Number)
+	badgeContent := fmt.Sprintf("![TagCheck](https://gogittag.herokuapp.com/tag?pr=%d)\r\n\r\n", pr.Number)
 	newBody := map[string]interface{}{
 		"body": badgeContent + pr.PullRequest.Body,
 	}

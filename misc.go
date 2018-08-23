@@ -31,6 +31,7 @@ type githubtag struct {
 
 type pullRequestModel struct {
 	Action      string  `json:"action"`
+	Number      int     `json:"number"`
 	PullRequest content `json:"pull_request"`
 }
 

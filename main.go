@@ -97,8 +97,8 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			req.Header.Add("Authorization", "token "+os.Getenv("GITHUB_USER")+":"+os.Getenv("GITHUB_ACCESS_TOKEN"))
-			fmt.Println("Authorization " + "token " + os.Getenv("GITHUB_USER") + ":" + os.Getenv("GITHUB_ACCESS_TOKEN"))
+			req.SetBasicAuth(os.Getenv("GITHUB_USER"), os.Getenv("GITHUB_ACCESS_TOKEN"))
+
 			resp, err := c.Do(req)
 			if err != nil {
 				log.Fatal(err)

@@ -1,11 +1,11 @@
 {
-    "name": "gogittag",
-    "description": "gogittag",
+    "name": "bitrise-steplib-git-check",
+    "description": "bitrise-steplib-git-check",
     "keywords": [
       "go",
       "sample",
       "example"
     ],
-    "website": "http://github.com/trapacska/gogittag",
-    "repository": "http://github.com/trapacska/gogittag"
+    "website": "https://github.com/bitrise-io/steplib-git-check",
+    "repository": "https://github.com/bitrise-io/steplib-git-check"
   }

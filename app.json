@@ -1,6 +1,6 @@
 {
-    "name": "bitrise-steplib-git-check",
-    "description": "bitrise-steplib-git-check",
+    "name": "steplib-git-check",
+    "description": "steplib-git-check",
     "keywords": [
       "go",
       "sample",

@@ -1,1 +1,1 @@
-web: gogittag
+web: bitrise-steplib-git-check

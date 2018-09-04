@@ -1,1 +1,1 @@
-web: bitrise-steplib-git-check
+web: steplib-git-check

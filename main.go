@@ -118,7 +118,7 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 		badgeContent := fmt.Sprintf("![TagCheck](https://%s/tag?pr=%d)\r\n\r\n", hostBaseURL, pr.Number)
 		releaseURLContent := ""
 
-		if strings.Contains(stepDefinition.Source.Git, "/bitrise-io/") || strings.Contains(stepDefinition.Source.Git, "/bitrise-steplib/") {
+		if strings.Contains(stepDefinition.Source.Git, "/bitrise-io/") || strings.Contains(stepDefinition.Source.Git, "/bitrise-steplib/") || strings.Contains(stepDefinition.Source.Git, "/bitrise-community/") {
 			releaseURLContent = fmt.Sprintf("%s/releases/%s\r\n\r\n", strings.TrimSuffix(stepDefinition.Source.Git, ".git"), version)
 		}
 

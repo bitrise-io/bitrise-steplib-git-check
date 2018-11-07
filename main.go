@@ -108,7 +108,7 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		yml, version, err := parseStepYML(fmt.Sprintf("%d", pr.Number))
+		stepDefinition, version, err := parseStepYML(fmt.Sprintf("%d", pr.Number))
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -118,8 +118,8 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 		badgeContent := fmt.Sprintf("![TagCheck](https://%s/tag?pr=%d)\r\n\r\n", hostBaseURL, pr.Number)
 		releaseURLContent := ""
 
-		if strings.Contains(yml.Source.Git, "/bitrise-io/") || strings.Contains(yml.Source.Git, "/bitrise-steplib/") {
-			releaseURLContent = fmt.Sprintf("%s/releases/%s\r\n\r\n", strings.TrimSuffix(yml.Source.Git, ".git"), version)
+		if strings.Contains(stepDefinition.Source.Git, "/bitrise-io/") || strings.Contains(stepDefinition.Source.Git, "/bitrise-steplib/") {
+			releaseURLContent = fmt.Sprintf("%s/releases/%s\r\n\r\n", strings.TrimSuffix(stepDefinition.Source.Git, ".git"), version)
 		}
 
 		newBody := map[string]interface{}{
@@ -148,26 +148,26 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if pr.Action == "closed" && pr.PullRequest.Merged {
-		yml, version, err := parseStepYML(fmt.Sprintf("%d", pr.Number))
+		stepDefinition, version, err := parseStepYML(fmt.Sprintf("%d", pr.Number))
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 
-		if strings.Contains(yml.Source.Git, "/bitrise-io/") || strings.Contains(yml.Source.Git, "/bitrise-steplib/") {
-			if yml.Title == nil {
+		if strings.Contains(stepDefinition.Source.Git, "/bitrise-io/") || strings.Contains(stepDefinition.Source.Git, "/bitrise-steplib/") || strings.Contains(stepDefinition.Source.Git, "/bitrise-community/") {
+			if stepDefinition.Title == nil {
 				return
 			}
 
-			title := *yml.Title + " v" + version
-			body, err := loadReleaseBody(yml.Source.Git, version)
+			title := *stepDefinition.Title + " v" + version
+			body, err := loadReleaseBody(stepDefinition.Source.Git, version)
 			if err != nil {
 				fmt.Println(err)
 				return
 			}
 
 			// append git release url
-			body += "\n\n" + fmt.Sprintf("%s/releases/%s\r\n\r\n", strings.TrimSuffix(yml.Source.Git, ".git"), version)
+			body += "\n\n" + fmt.Sprintf("%s/releases/%s\r\n\r\n", strings.TrimSuffix(stepDefinition.Source.Git, ".git"), version)
 
 			if err := createDiscourseTopic(title, body); err != nil {
 				fmt.Println(err)

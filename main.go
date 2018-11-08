@@ -167,7 +167,7 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 			}
 
 			// append git release url
-			body += "\n\n" + fmt.Sprintf("%s/releases/%s\r\n\r\n", strings.TrimSuffix(stepDefinition.Source.Git, ".git"), version)
+			body += "\n\n\n" + fmt.Sprintf("%s/releases/%s\r\n\r\n", strings.TrimSuffix(stepDefinition.Source.Git, ".git"), version)
 
 			if err := createDiscourseTopic(title, body); err != nil {
 				fmt.Println(err)

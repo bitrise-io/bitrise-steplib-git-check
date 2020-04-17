@@ -145,28 +145,33 @@ func isPRHasStepYML(prID string) (bool, error) {
 	return false, nil
 }
 
-func parseStepYML(prID string) (stepmanModels.StepModel, string, error) {
+func parseStep(prID string) (stepmanModels.StepModel, string, string, error) {
 	var files []file
 	if err := httpLoadJSON(fmt.Sprintf("https://api.github.com/repos/bitrise-io/bitrise-steplib/pulls/%s/files", prID), &files); err != nil {
-		return stepmanModels.StepModel{}, "", err
+		return stepmanModels.StepModel{}, "", "", err
 	}
 
 	for _, file := range files {
 		if strings.HasSuffix(file.Filename, "step.yml") && strings.HasPrefix(file.Filename, "steps/") {
 			var yml stepmanModels.StepModel
 			if err := httpLoadYML(file.RawURL, &yml); err != nil {
-				return stepmanModels.StepModel{}, "", err
+				return stepmanModels.StepModel{}, "", "", err
 			}
 
 			if yml.Source == nil {
-				return stepmanModels.StepModel{}, "", fmt.Errorf("no source in step.yml")
+				return stepmanModels.StepModel{}, "", "", fmt.Errorf("no source in step.yml")
 			}
 
-			return yml, filepath.Base(filepath.Dir(file.Filename)), nil
+			versionDir := filepath.Dir(file.Filename)
+			version := filepath.Base(versionDir)
+			stepIDDir := filepath.Dir(versionDir)
+			stepID := filepath.Base(stepIDDir)
+
+			return yml, version, stepID, nil
 		}
 	}
 
-	return stepmanModels.StepModel{}, "", fmt.Errorf("no step.yml found")
+	return stepmanModels.StepModel{}, "", "", fmt.Errorf("no step.yml found")
 }
 
 func createDiscourseTopic(title, body string) error {

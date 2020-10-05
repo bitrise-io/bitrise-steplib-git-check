@@ -86,7 +86,11 @@ func isNewStep(stepID string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			fmt.Printf("Failed to close body: %s", err)
+		}
+	}()
 	return resp.StatusCode == http.StatusNotFound, nil
 }
 

@@ -8,12 +8,21 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/patrickmn/go-cache"
 
 	"github.com/gobuffalo/envy"
 	"github.com/gorilla/mux"
 )
 
+var c *cache.Cache
+
 func main() {
+	envy.Load()
+
+	c = cache.New(5*time.Minute, 10*time.Minute)
+
 	router := mux.NewRouter()
 
 	////
@@ -37,48 +46,52 @@ func tagHandler(w http.ResponseWriter, r *http.Request) {
 
 	prID := r.URL.Query().Get("pr")
 	if prID == "" {
-		if err := respondWithIcon(icnErr, w); err != nil {
+		if err := respondWithIcon(prStatusIcons[prStatusErr], w); err != nil {
 			fmt.Println(err)
 		}
 		return
 	}
 
+	var s prStatus
+	x, found := c.Get(prID)
+
+	if found {
+		fmt.Printf("Skipping PR status check for %s\n", prID)
+		s = x.(prStatus)
+	} else {
+		fmt.Printf("Checking PR status for %s\n", prID)
+		s = checkPRStatus(prID)
+		c.Set(prID, s, cache.DefaultExpiration)
+	}
+
+	if err := respondWithIcon(prStatusIcons[s], w); err != nil {
+		fmt.Println(err)
+	}
+}
+
+func checkPRStatus(prID string) prStatus {
 	yml, version, _, err := parseStep(prID)
 	if err != nil {
-		if err := respondWithIcon(icnErr, w); err != nil {
-			fmt.Println(err)
-		}
-		return
+		return prStatusErr
 	}
 
 	versionParts := strings.Split(version, ".")
 
 	if len(versionParts) != 3 {
-		if err := respondWithIcon(icnErrSemver, w); err != nil {
-			fmt.Println(err)
-		}
-		return
+		return prStatusErrSemver
 	}
 
 	for _, part := range versionParts {
 		if _, err := strconv.Atoi(part); err != nil {
-			if err := respondWithIcon(icnErrSemver, w); err != nil {
-				fmt.Println(err)
-			}
-			return
+			return prStatusErrSemver
 		}
 	}
 
 	if err := checkGithubTag(yml.Source.Git, version, yml.Source.Commit); err != nil {
-		if err := respondWithIcon(icnErrCommit, w); err != nil {
-			fmt.Println(err)
-		}
-		return
+		return prStatusErrCommit
 	}
 
-	if err := respondWithIcon(icnOk, w); err != nil {
-		fmt.Println(err)
-	}
+	return prStatusOK
 }
 
 func isNewStep(stepID string) (bool, error) {

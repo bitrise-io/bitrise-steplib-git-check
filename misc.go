@@ -18,12 +18,24 @@ import (
 )
 
 const (
-	icnOk        = "assets/ok.svg"
-	icnErr       = "assets/cross.svg"
-	icnErrSemver = "assets/invalid-semver.svg"
-	icnErrCommit = "assets/invalid-commit.svg"
-	hostBaseURL  = "bitrise-steplib-git-check.herokuapp.com"
+	hostBaseURL = "bitrise-steplib-git-check.herokuapp.com"
 )
+
+type prStatus int
+
+const (
+	prStatusOK prStatus = iota
+	prStatusErr
+	prStatusErrSemver
+	prStatusErrCommit
+)
+
+var prStatusIcons = map[prStatus]string{
+	prStatusOK:        "assets/ok.svg",
+	prStatusErr:       "assets/cross.svg",
+	prStatusErrSemver: "assets/invalid-semver.svg",
+	prStatusErrCommit: "assets/invalid-commit.svg",
+}
 
 type githubtag struct {
 	Name   string `json:"name"`

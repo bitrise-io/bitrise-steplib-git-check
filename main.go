@@ -165,10 +165,17 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		req.SetBasicAuth(os.Getenv("GITHUB_USER"), os.Getenv("GITHUB_ACCESS_TOKEN"))
-		_, err = c.Do(req)
+		response, err := c.Do(req)
 		if err != nil {
 			fmt.Println(err)
 			return
+		}
+
+		if response.StatusCode != http.StatusOK {
+			fmt.Println(fmt.Sprintf("failed to update PR, ID: %d", pr.Number))
+			fmt.Println(response)
+
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		}
 	}
 
